@@ -27,5 +27,5 @@ my $from_email_file = EmailNugget->new_from_email("test_files/new_from_email.tes
 $from_email_file->write_to("test_files/write_to_from_email.test");
 
 while (my $line = $from_email_file->stream_message()) {
-	print "LINE: " . $line;
+	print $line;
 }
