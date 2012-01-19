@@ -1,6 +1,7 @@
 #!/usr/local/bin/perl
 
 use lib './';
+use Data::Dumper;
 use EmailNugget;
 use Scalar::Util qw(reftype);
 
@@ -12,12 +13,19 @@ my $message = {
 		'adsf' => "weeee",
 	},
 	'message' => {
-		'data' => "From: \"from\" <from\@localhost>\nTo: \"rcpt\" <rcpt\@localhost>\nSubject: Test\n\nTesting...\n"
+		'data' => "From: \"from\" <from\@localhost>\nTo: \"rcpt\" <rcpt\@localhost>\nSubject: Test from data\n\nTesting...\n"
 	}
 };
 
 my $nugget = EmailNugget->new($message);
-$nugget->write_to("write_to.test");
-my $open_nugget = EmailNugget->new_from("new_from.test");
+$nugget->write_to("test_files/write_to_from_data.test");
 
-print $open_nugget->data;
+my $from_nugget_file = EmailNugget->new_from_nugget("test_files/new_from_nugget.test");
+$from_nugget_file->write_to("test_files/write_to_from_nugget.test");
+
+my $from_email_file = EmailNugget->new_from_email("test_files/new_from_email.test", $message->{'envelope'});
+$from_email_file->write_to("test_files/write_to_from_email.test");
+
+while (my $line = $from_email_file->stream_message()) {
+	print "LINE: " . $line;
+}

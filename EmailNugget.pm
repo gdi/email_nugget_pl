@@ -2,6 +2,7 @@ package EmailNugget;
 
 use strict;
 use Data::UUID;
+use Data::Dumper;
 use JSON;
 use Digest::MD5 qw(md5_hex);
 use Scalar::Util "reftype";
@@ -12,6 +13,7 @@ sub new {
 
 	my $self = {
 		message => {
+			'data_file' => $args->{'message'}->{'data_file'},
 			'data' => $args->{'message'}->{'data'},
 			'checksum' => $args->{'message'}->{'checksum'},
 		},
@@ -58,22 +60,45 @@ sub ensure_fields {
 		$self->{envelope}->{$key} = "" if (!$self->{envelope}->{$key});
 		$self->{envelope}->{$key} =~ s/\n//g;
 	}
-	foreach my $key (keys %{$self->{message}}) {
-		$self->{message}->{$key} = "" if (!$self->{message}->{$key});
-	}
 }
 
 sub checksum {
 	my ($self) = @_;
 	return $self->{message}->{checksum} if ($self->{message}->{checksum});
-	my $checksum = md5_hex($self->{message}->{data});
+	my $checksum = md5_hex($self->data);
 	$self->{message}->{checksum} = $checksum;
 	return $checksum;
 }
 
+sub stream_message {
+	my ($self) = @_;
+	if (!$self->{message}->{data_file}->{stream_position}) {
+		$self->{message}->{data_file}->{stream_position} = $self->{message}->{data_file}->{data_start_position};
+	}
+	open(DATA, $self->{message}->{data_file}->{path});
+	seek(DATA, $self->{message}->{data_file}->{stream_position}, 0);
+	if (my $line = <DATA>) {
+		my $position = tell DATA;
+		$self->{message}->{data_file}->{stream_position} = $position;
+		return $line;
+	} else {
+		$self->{message}->{data_file}->{stream_position} = undef;
+		return undef;
+	}
+}
+
 sub data {
 	my ($self) = @_;
-	return $self->{message}->{data};
+	return $self->{message}->{data} if ($self->{message}->{data});
+	my $message = "";
+	if ($self->{message}->{data_file}->{path}) {
+		open(DATA, $self->{message}->{data_file}->{path});
+		seek(DATA, $self->{message}->{data_file}->{data_start_position}, 0);
+		while (my $line = <DATA>) {
+			$message = $message . $line;
+		}
+	}
+	return $message;
 }
 
 sub ip {
@@ -108,11 +133,7 @@ sub context {
 
 sub message {
 	my ($self) = @_;
-	my $response = {
-		'data' => $self->data,
-		'checksum' => $self->checksum,
-	};
-	return ($response);
+	return ($self->{message});
 }
 
 sub envelope {
@@ -128,26 +149,50 @@ sub generate_id {
 	return $uuid;
 }
 
-sub new_from {
+sub new_from_email {
+	my ($class, $file_path, $envelope) = @_;
+	return undef if (! -e $file_path);
+	open(EMAIL, $file_path) || return undef;
+	my $position = tell EMAIL;
+	my $ctx = Digest::MD5->new;
+	$ctx->addfile(*EMAIL);
+	my $checksum = $ctx->hexdigest;
+	close(EMAIL);
+	return EmailNugget->new({
+		'envelope' => $envelope,
+		'message' => {
+			'data_file' => {
+				'path' => $file_path,
+				'data_start_position' => $position,
+			},
+			'checksum' => $checksum
+		}
+	});
+}
+
+sub new_from_nugget {
 	my ($class, $file_path) = @_;
 	return undef if (! -e $file_path);
 	open(NUGGET, $file_path) || return undef;
 	my $json_envelope = <NUGGET>;
 	chomp($json_envelope);
 	my $json = JSON->new->allow_nonref;
-
-	my $args = {};
-	$args->{envelope} = $json->decode($json_envelope);
 	my $checksum = <NUGGET>;
 	chomp($checksum);
-	$args->{message}->{checksum} = $checksum;
-	my $message = "";
-	while (my $line = <NUGGET>) {
-		$message = $message . $line;
-	}
-	$args->{message}->{data} = $message;
-	close(NUGGET);
-	return EmailNugget->new($args);
+	my $position = tell NUGGET;
+	my $nugget = EmailNugget->new({
+		'envelope' => $json->decode($json_envelope),
+		'message' => {
+			'data_file' => {
+				'path' => $file_path,
+				'data_start_position' => $position
+			},
+			'checksum' => $checksum
+		}
+	});
+	open (F, ">jd.log");
+	print F Dumper $nugget;
+	return $nugget;
 }
 
 sub write_to {
@@ -156,8 +201,21 @@ sub write_to {
 	my $json = JSON->new->allow_nonref;
 	print NUGGET $json->encode($self->{envelope}) . "\n";
 	print NUGGET $self->checksum . "\n";
-	print NUGGET $self->{message}->{data};
-	close(NUGGET);
+	if ($self->{message}->{data}) {
+		print NUGGET $self->{message}->{data};
+		close(NUGGET);
+		return 1;
+	}
+	if ($self->{message}->{data_file}->{path}) {
+		open(DATA, $self->{message}->{data_file}->{path});
+		seek(DATA, $self->{message}->{data_file}->{position}, 0);
+		while (my $line = <DATA>) {
+                        print NUGGET $line;
+                }
+		close(NUGGET);
+		return 1;
+        }
+	return -1;
 }
 
 1;

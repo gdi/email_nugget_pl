@@ -1,0 +1,7 @@
+{"date":"","ip":"","context":"","rcpt_to":["rcpt1@localhost","rcpt2@localhost","rcpt3@localhost"],"mail_from":"from@localhost","helo":"localhost"}
+fee1707279f9bad12547a44816e5a0f3
+From: "from" <from@localhost>
+To: "rcpt" <rcpt@localhost>
+Subject: Test from raw email
+
+Testing...
