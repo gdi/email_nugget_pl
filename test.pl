@@ -12,10 +12,12 @@ my $message = {
 		'adsf' => "weeee",
 	},
 	'message' => {
-		'data' => "asdfasdfasdfasdfasdf.\n"
+		'data' => "From: \"from\" <from\@localhost>\nTo: \"rcpt\" <rcpt\@localhost>\nSubject: Test\n\nTesting...\n"
 	}
 };
 
 my $nugget = EmailNugget->new($message);
 $nugget->write_to("write_to.test");
 my $open_nugget = EmailNugget->new_from("new_from.test");
+
+print $open_nugget->data;
