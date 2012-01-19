@@ -180,7 +180,7 @@ sub new_from_nugget {
 	my $checksum = <NUGGET>;
 	chomp($checksum);
 	my $position = tell NUGGET;
-	my $nugget = EmailNugget->new({
+	return EmailNugget->new({
 		'envelope' => $json->decode($json_envelope),
 		'message' => {
 			'data_file' => {
@@ -190,9 +190,6 @@ sub new_from_nugget {
 			'checksum' => $checksum
 		}
 	});
-	open (F, ">jd.log");
-	print F Dumper $nugget;
-	return $nugget;
 }
 
 sub write_to {
