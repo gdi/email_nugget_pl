@@ -11,10 +11,14 @@ my $message = {
 		'rcpt_to' => ["rcpt1\@localhost", "rcpt2\@localhost", "rcpt3\@localhost"],
 		'helo' => "localhost\n\n",
 		'adsf' => "weeee",
+    'misc' => {
+      'test_tag_1' => "Hello World!\n",
+      'test_tag_2' => "Test tag 2!\n",
+    },
 	},
 	'message' => {
 		'data' => "From: \"from\" <from\@localhost>\nTo: \"rcpt\" <rcpt\@localhost>\nSubject: Test from data\n\nTesting...\n"
-	}
+	},
 };
 
 my $nugget = EmailNugget->new($message);

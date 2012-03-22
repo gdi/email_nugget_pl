@@ -24,6 +24,7 @@ sub new {
 			'rcpt_to' => $args->{'envelope'}->{'rcpt_to'},
 			'date' => $args->{'envelope'}->{'date'},
 			'context' => $args->{'envelope'}->{'context'},
+      'misc' => $args->{'envelope'}->{'misc'},
 		},
 		id => $args->{'id'},
 	};
@@ -136,6 +137,12 @@ sub message {
 	return ($self->{message});
 }
 
+sub json_envelope {
+	my ($self) = @_;
+	my $json = JSON->new->allow_nonref;
+	return $json->encode($self->{envelope}) . "\n";
+}
+
 sub envelope {
 	my ($self) = @_;
 	return $self->{envelope};
@@ -158,6 +165,7 @@ sub new_from_email {
 	$ctx->addfile(*EMAIL);
 	my $checksum = $ctx->hexdigest;
 	close(EMAIL);
+  $envelope->{'misc'} ||= {};
 	return EmailNugget->new({
 		'envelope' => $envelope,
 		'message' => {
@@ -166,7 +174,7 @@ sub new_from_email {
 				'data_start_position' => $position,
 			},
 			'checksum' => $checksum
-		}
+		},
 	});
 }
 
@@ -180,15 +188,17 @@ sub new_from_nugget {
 	my $checksum = <NUGGET>;
 	chomp($checksum);
 	my $position = tell NUGGET;
+  my $envelope = $json->decode($json_envelope);
+  $envelope->{'misc'} ||= {};
 	return EmailNugget->new({
-		'envelope' => $json->decode($json_envelope),
+		'envelope' => $envelope,
 		'message' => {
 			'data_file' => {
 				'path' => $file_path,
 				'data_start_position' => $position
 			},
 			'checksum' => $checksum
-		}
+		},
 	});
 }
 
