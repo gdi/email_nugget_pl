@@ -15,6 +15,7 @@ my $message = {
       'test_tag_1' => "Hello World!\n",
       'test_tag_2' => "Test tag 2!\n",
     },
+    'id' => 'asdfasdfasdf',
 	},
 	'message' => {
 		'data' => "From: \"from\" <from\@localhost>\nTo: \"rcpt\" <rcpt\@localhost>\nSubject: Test from data\n\nTesting...\n"

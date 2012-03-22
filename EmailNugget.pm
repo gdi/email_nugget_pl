@@ -25,8 +25,8 @@ sub new {
 			'date' => $args->{'envelope'}->{'date'},
 			'context' => $args->{'envelope'}->{'context'},
       'misc' => $args->{'envelope'}->{'misc'},
+      'id' => $args->{'envelope'}->{'id'},
 		},
-		id => $args->{'id'},
 	};
 	bless $self, $class;
 	$self->set_recipients();
@@ -51,7 +51,7 @@ sub set_recipients {
 
 sub ensure_id {
 	my ($self) = @_;
-	$self->{id} = $self->generate_id() if (!$self->{id});
+	$self->{'envelope'}->{'id'} = $self->generate_id() if (!$self->{'envelope'}->{'id'});
 }
 
 sub ensure_fields {
@@ -166,16 +166,18 @@ sub new_from_email {
 	my $checksum = $ctx->hexdigest;
 	close(EMAIL);
   $envelope->{'misc'} ||= {};
-	return EmailNugget->new({
-		'envelope' => $envelope,
-		'message' => {
-			'data_file' => {
-				'path' => $file_path,
-				'data_start_position' => $position,
-			},
-			'checksum' => $checksum
-		},
-	});
+  my $nugget_hash = {
+    'envelope' => $envelope,
+    'message' => {
+      'data_file' => {
+        'path' => $file_path,
+        'data_start_position' => $position,
+      },
+      'checksum' => $checksum
+    },
+  };
+  $nugget_hash->{'id'} = $envelope->{'id'} if ($envelope->{'id'});
+	return EmailNugget->new($nugget_hash);
 }
 
 sub new_from_nugget {
@@ -190,16 +192,18 @@ sub new_from_nugget {
 	my $position = tell NUGGET;
   my $envelope = $json->decode($json_envelope);
   $envelope->{'misc'} ||= {};
-	return EmailNugget->new({
-		'envelope' => $envelope,
-		'message' => {
-			'data_file' => {
-				'path' => $file_path,
-				'data_start_position' => $position
-			},
-			'checksum' => $checksum
-		},
-	});
+  my $nugget_hash = {
+    'envelope' => $envelope,
+    'message' => {
+      'data_file' => {
+        'path' => $file_path,
+        'data_start_position' => $position
+      },
+      'checksum' => $checksum
+    },
+  };
+  $nugget_hash->{'id'} = $envelope->{'id'} if ($envelope->{'id'});
+	return EmailNugget->new($nugget_hash);
 }
 
 sub write_to {
@@ -217,11 +221,11 @@ sub write_to {
 		open(DATA, $self->{message}->{data_file}->{path});
 		seek(DATA, $self->{message}->{data_file}->{position}, 0);
 		while (my $line = <DATA>) {
-                        print NUGGET $line;
-                }
+      print NUGGET $line;
+    }
 		close(NUGGET);
 		return 1;
-        }
+  }
 	return -1;
 }
 
