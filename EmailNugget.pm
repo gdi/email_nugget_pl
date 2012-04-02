@@ -31,7 +31,6 @@ sub new {
 	bless $self, $class;
 	$self->set_recipients();
 	$self->ensure_id();
-	$self->ensure_fields();
 	return $self;
 }
 
@@ -51,16 +50,7 @@ sub set_recipients {
 
 sub ensure_id {
 	my ($self) = @_;
-	$self->{'envelope'}->{'id'} = $self->generate_id() if (!$self->{'envelope'}->{'id'});
-}
-
-sub ensure_fields {
-	my ($self) = @_;
-	foreach my $key (keys %{$self->{envelope}}) {
-		next if ($key eq 'rcpt_to');
-		$self->{envelope}->{$key} = "" if (!$self->{envelope}->{$key});
-		$self->{envelope}->{$key} =~ s/\n//g;
-	}
+	$self->{'envelope'}->{'id'} = $self->generate_id() unless ($self->{'envelope'}->{'id'});
 }
 
 sub checksum {
@@ -216,10 +206,9 @@ sub write_to {
 		print NUGGET $self->{message}->{data};
 		close(NUGGET);
 		return 1;
-	}
-	if ($self->{message}->{data_file}->{path}) {
+	} elsif ($self->{message}->{data_file}->{path}) {
 		open(DATA, $self->{message}->{data_file}->{path});
-		seek(DATA, $self->{message}->{data_file}->{position}, 0);
+		seek(DATA, $self->{message}->{data_file}->{data_start_position}, 0);
 		while (my $line = <DATA>) {
       print NUGGET $line;
     }
