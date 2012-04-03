@@ -6,6 +6,7 @@ use Data::Dumper;
 use JSON;
 use Digest::MD5 qw(md5_hex);
 use Scalar::Util "reftype";
+use Fcntl ':flock';
 
 sub new {
 	my $class = shift;
@@ -199,6 +200,7 @@ sub new_from_nugget {
 sub write_to {
 	my ($self, $file_path) = @_;
 	open(NUGGET, ">$file_path") || return -1;
+  flock(NUGGET, LOCK_EX);
 	my $json = JSON->new->allow_nonref;
 	print NUGGET $json->encode($self->{envelope}) . "\n";
 	print NUGGET $self->checksum . "\n";
