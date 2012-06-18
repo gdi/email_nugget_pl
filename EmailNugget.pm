@@ -25,8 +25,8 @@ sub new {
 			'rcpt_to' => $args->{'envelope'}->{'rcpt_to'},
 			'date' => $args->{'envelope'}->{'date'},
 			'context' => $args->{'envelope'}->{'context'},
-      'misc' => $args->{'envelope'}->{'misc'},
-      'id' => $args->{'envelope'}->{'id'},
+			'misc' => $args->{'envelope'}->{'misc'},
+			'id' => $args->{'envelope'}->{'id'},
 		},
 	};
 	bless $self, $class;
@@ -156,18 +156,20 @@ sub new_from_email {
 	$ctx->addfile(*EMAIL);
 	my $checksum = $ctx->hexdigest;
 	close(EMAIL);
-  $envelope->{'misc'} ||= {};
-  my $nugget_hash = {
-    'envelope' => $envelope,
-    'message' => {
-      'data_file' => {
-        'path' => $file_path,
-        'data_start_position' => $position,
-      },
-      'checksum' => $checksum
-    },
-  };
-  $nugget_hash->{'id'} = $envelope->{'id'} if ($envelope->{'id'});
+  
+	$envelope->{'misc'} ||= {};
+  
+	my $nugget_hash = {
+		'envelope' => $envelope,
+		'message' => {
+			'data_file' => {
+				'path' => $file_path,
+				'data_start_position' => $position,
+			},
+			'checksum' => $checksum
+		},
+	};
+	$nugget_hash->{'id'} = $envelope->{'id'} if ($envelope->{'id'});
 	return EmailNugget->new($nugget_hash);
 }
 
@@ -181,26 +183,26 @@ sub new_from_nugget {
 	my $checksum = <NUGGET>;
 	chomp($checksum);
 	my $position = tell NUGGET;
-  my $envelope = $json->decode($json_envelope);
-  $envelope->{'misc'} ||= {};
-  my $nugget_hash = {
-    'envelope' => $envelope,
-    'message' => {
-      'data_file' => {
-        'path' => $file_path,
-        'data_start_position' => $position
-      },
-      'checksum' => $checksum
-    },
-  };
-  $nugget_hash->{'id'} = $envelope->{'id'} if ($envelope->{'id'});
+	my $envelope = $json->decode($json_envelope);
+	$envelope->{'misc'} ||= {};
+	my $nugget_hash = {
+		'envelope' => $envelope,
+		'message' => {
+			'data_file' => {
+				'path' => $file_path,
+				'data_start_position' => $position
+			},
+			'checksum' => $checksum
+		},
+	};
+	$nugget_hash->{'id'} = $envelope->{'id'} if ($envelope->{'id'});
 	return EmailNugget->new($nugget_hash);
 }
 
 sub write_to {
 	my ($self, $file_path) = @_;
 	open(NUGGET, ">$file_path") || return -1;
-  flock(NUGGET, LOCK_EX);
+	flock(NUGGET, LOCK_EX);
 	my $json = JSON->new->allow_nonref;
 	print NUGGET $json->encode($self->{envelope}) . "\n";
 	print NUGGET $self->checksum . "\n";
@@ -212,11 +214,11 @@ sub write_to {
 		open(DATA, $self->{message}->{data_file}->{path});
 		seek(DATA, $self->{message}->{data_file}->{data_start_position}, 0);
 		while (my $line = <DATA>) {
-      print NUGGET $line;
-    }
+			print NUGGET $line;
+		}
 		close(NUGGET);
 		return 1;
-  }
+	}
 	return -1;
 }
 
