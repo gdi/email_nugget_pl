@@ -201,7 +201,7 @@ sub new_from_nugget {
 
 sub write_to {
 	my ($self, $file_path) = @_;
-	open(NUGGET, ">$file_path") || return -1;
+	open(NUGGET, ">$file_path") || die "Failed to open $file_path: $@\n";
 	flock(NUGGET, LOCK_EX);
 	my $json = JSON->new->allow_nonref;
 	print NUGGET $json->encode($self->{envelope}) . "\n";
@@ -219,7 +219,7 @@ sub write_to {
 		close(NUGGET);
 		return 1;
 	}
-	return -1;
+	die "Can't determine data for nugget\n";
 }
 
 1;

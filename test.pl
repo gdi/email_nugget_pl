@@ -34,3 +34,10 @@ $from_email_file->write_to("test_files/write_to_from_email.test");
 while (my $line = $from_email_file->stream_message()) {
 	print $line;
 }
+
+eval {
+  $from_email_file->write_to('/this/path/doesnt/exist.txt');
+};
+if ($@) {
+	print "Failed to save nugget: $@";
+}
