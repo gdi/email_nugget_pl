@@ -37,14 +37,14 @@ sub new {
 
 sub set_recipients {
 	my ($self) = @_;
-	if (reftype($self->{envelope}->{'rcpt_to'}) ne "ARRAY") {
-		my $recipient = $self->{envelope}->{'rcpt_to'};
+	if (reftype($self->envelope()->{'rcpt_to'}) ne "ARRAY") {
+		my $recipient = $self->envelope()->{'rcpt_to'};
 		$recipient =~ s/\n//g;
-		$self->{envelope}->{'rcpt_to'} = [$recipient];
+		$self->envelope()->{'rcpt_to'} = [$recipient];
 	}
 	my $i = 0;
-	foreach my $recipient (@{$self->{envelope}->{'rcpt_to'}}) {
-		$self->{envelope}->{'rcpt_to'}[$i] =~ s/\n//g;
+	foreach my $recipient (@{$self->envelope()->{'rcpt_to'}}) {
+		$self->envelope()->{'rcpt_to'}[$i] =~ s/\n//g;
 		$i++;
 	}
 }
@@ -95,32 +95,32 @@ sub data {
 
 sub ip {
 	my ($self) = @_;
-	return $self->{envelope}->{ip};
+	return $self->envelope()->{ip};
 }
 
 sub helo {
 	my ($self) = @_;
-	return $self->{envelope}->{helo};
+	return $self->envelope()->{helo};
 }
 
 sub mail_from {
 	my ($self) = @_;
-	return $self->{envelope}->{mail_from};
+	return $self->envelope()->{mail_from};
 }
 
 sub rcpt_to {
 	my ($self) = @_;
-	return $self->{envelope}->{rcpt_to};
+	return $self->envelope()->{rcpt_to};
 }
 
 sub date {
 	my ($self) = @_;
-	return $self->{envelope}->{date};
+	return $self->envelope()->{date};
 }
 
 sub context {
 	my ($self) = @_;
-	return $self->{envelope}->{context};
+	return $self->envelope()->{context};
 }
 
 sub message {
@@ -130,8 +130,7 @@ sub message {
 
 sub json_envelope {
 	my ($self) = @_;
-	my $json = JSON->new->allow_nonref;
-	return $json->encode($self->{envelope}) . "\n";
+	encode_json($self->envelope()) . "\n";
 }
 
 sub envelope {
@@ -179,11 +178,10 @@ sub new_from_nugget {
 	open(NUGGET, $file_path) || return undef;
 	my $json_envelope = <NUGGET>;
 	chomp($json_envelope);
-	my $json = JSON->new->allow_nonref;
 	my $checksum = <NUGGET>;
 	chomp($checksum);
 	my $position = tell NUGGET;
-	my $envelope = $json->decode($json_envelope);
+	my $envelope = decode_json($json_envelope);
 	$envelope->{'misc'} ||= {};
 	my $nugget_hash = {
 		'envelope' => $envelope,
@@ -203,8 +201,7 @@ sub write_to {
 	my ($self, $file_path) = @_;
 	open(NUGGET, ">$file_path") || die "Failed to open $file_path: $@\n";
 	flock(NUGGET, LOCK_EX);
-	my $json = JSON->new->allow_nonref;
-	print NUGGET $json->encode($self->envelope()) . "\n";
+	print NUGGET $self->json_envelope();
 	print NUGGET $self->checksum . "\n";
 	if ($self->{message}->{data}) {
 		print NUGGET $self->{message}->{data};
