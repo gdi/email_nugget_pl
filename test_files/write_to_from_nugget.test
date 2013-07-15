@@ -1,6 +1,4 @@
-{"date":"","ip":"","context":"","rcpt_to":["rcpt1@localhost","rcpt2@localhost","rcpt3@localhost"],"mail_from":"from@localhost","helo":"localhost"}
-60fa3fffa5617958314974fd8b24a363
-{"date":"","ip":"","context":"","rcpt_to":["rcpt1@localhost","rcpt2@localhost","rcpt3@localhost"],"mail_from":"from@localhost","helo":"localhost"}
+{"date":"","ip":"","misc":{},"context":"inbound","rcpt_to":["rcpt1@localhost","rcpt2@localhost","rcpt3@localhost"],"id":"c3ea6262ed6a11e2bd44532885f1e189","mail_from":"from@localhost","helo":"localhost"}
 60fa3fffa5617958314974fd8b24a363
 From: "from" <from@localhost>
 To: "rcpt" <rcpt@localhost>

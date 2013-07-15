@@ -204,7 +204,7 @@ sub write_to {
 	open(NUGGET, ">$file_path") || die "Failed to open $file_path: $@\n";
 	flock(NUGGET, LOCK_EX);
 	my $json = JSON->new->allow_nonref;
-	print NUGGET $json->encode($self->{envelope}) . "\n";
+	print NUGGET $json->encode($self->envelope()) . "\n";
 	print NUGGET $self->checksum . "\n";
 	if ($self->{message}->{data}) {
 		print NUGGET $self->{message}->{data};

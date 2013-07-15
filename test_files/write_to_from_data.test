@@ -1,4 +1,4 @@
-{"date":"","ip":"","context":"","rcpt_to":["rcpt1@localhost","rcpt2@localhost","rcpt3@localhost"],"mail_from":"from@localhost","helo":"localhost"}
+{"date":null,"ip":null,"misc":{"test_tag_1":"Hello World!\n","test_tag_2":"Test tag 2!\n"},"context":"inbound","rcpt_to":["rcpt1@localhost","rcpt2@localhost","rcpt3@localhost"],"id":"asdfasdfasdf","mail_from":"from@localhost","helo":"localhost\n\n"}
 d26931e8077db6fc37dab398cc1b8bb7
 From: "from" <from@localhost>
 To: "rcpt" <rcpt@localhost>

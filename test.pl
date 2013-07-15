@@ -11,11 +11,12 @@ my $message = {
 		'rcpt_to' => ["rcpt1\@localhost", "rcpt2\@localhost", "rcpt3\@localhost"],
 		'helo' => "localhost\n\n",
 		'adsf' => "weeee",
-    'misc' => {
-      'test_tag_1' => "Hello World!\n",
-      'test_tag_2' => "Test tag 2!\n",
-    },
-    'id' => 'asdfasdfasdf',
+		'misc' => {
+			'test_tag_1' => "Hello World!\n",
+			'test_tag_2' => "Test tag 2!\n",
+		},
+		'id' => 'asdfasdfasdf',
+		'context' => 'inbound'
 	},
 	'message' => {
 		'data' => "From: \"from\" <from\@localhost>\nTo: \"rcpt\" <rcpt\@localhost>\nSubject: Test from data\n\nTesting...\n"
@@ -36,7 +37,7 @@ while (my $line = $from_email_file->stream_message()) {
 }
 
 eval {
-  $from_email_file->write_to('/this/path/doesnt/exist.txt');
+	$from_email_file->write_to('/this/path/doesnt/exist.txt');
 };
 if ($@) {
 	print "Failed to save nugget: $@";
